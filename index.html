@@ -3,269 +3,302 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nature's Code</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nature's Code - Board Game</title>
 <style>
-* { box-sizing: border-box; }
+* { box-sizing:border-box; }
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #edf5e9;
-  color: #23452d;
-  text-align: center;
+ margin:0;
+ padding:15px;
+ font-family:Arial,sans-serif;
+ background:#eaf3e3;
+ color:#23452d;
+ text-align:center;
 }
 header {
-  background: #245c38;
-  color: white;
-  padding: 25px 15px;
+ background:#245c38;
+ color:white;
+ padding:20px 10px;
+ border-radius:16px;
 }
-header h1 { margin: 5px; font-size: 30px; }
-header p { margin: 8px; }
-.container {
-  max-width: 550px;
-  margin: 25px auto;
-  padding: 15px;
-}
+h1 { margin:5px; }
+.container { max-width:650px; margin:18px auto; }
 .card {
-  background: white;
-  padding: 25px 18px;
-  border-radius: 18px;
-  box-shadow: 0 4px 15px #0001;
+ background:white;
+ padding:18px;
+ border-radius:16px;
+ margin:14px 0;
+ box-shadow:0 3px 12px #0001;
 }
-.nature { font-size: 65px; margin: 12px; }
+button, select {
+ padding:13px;
+ border-radius:10px;
+ border:0;
+ font-size:16px;
+}
 button {
-  background: #34794a;
-  color: white;
-  border: none;
-  padding: 14px 18px;
-  margin: 8px 0;
-  border-radius: 10px;
-  font-size: 16px;
-  width: 100%;
-  cursor: pointer;
+ background:#34794a;
+ color:white;
+ cursor:pointer;
 }
-button:hover { background: #245c38; }
-.option {
-  background: #e8f1e5;
-  color: #23452d;
-  border: 2px solid #c6dbc5;
+button:disabled { opacity:.45; }
+select { background:#e8f1e5; color:#23452d; }
+#setup button, #roll, #nextTurn { width:100%; margin-top:12px; }
+#game { display:none; }
+#board {
+ display:grid;
+ grid-template-columns:repeat(5,1fr);
+ gap:5px;
+ margin:15px auto;
 }
-.option:disabled { opacity: 1; }
-#feedback {
-  font-weight: bold;
-  margin: 18px 0;
-  min-height: 25px;
+.tile {
+ min-height:75px;
+ border:2px solid #c7d9bd;
+ border-radius:9px;
+ background:#f1f6ed;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ font-size:12px;
+ position:relative;
+ padding:3px;
 }
-#game { display: none; }
-#result { display: none; }
-.progress {
-  background: #dce8d8;
-  height: 10px;
-  border-radius: 10px;
-  margin: 15px 0;
+.tile .emoji { font-size:22px; }
+.tile .number { font-weight:bold; }
+.tile.special { background:#d9edcf; }
+.tile.finish { background:#f8e6a7; }
+.tile.start { background:#b9dfb8; }
+.token { font-size:17px; }
+#dice { font-size:55px; margin:10px; }
+#questionArea { display:none; }
+#answers button {
+ display:block;
+ width:100%;
+ margin:7px 0;
+ background:#e8f1e5;
+ color:#23452d;
+ border:2px solid #c6dbc5;
 }
-#bar {
-  background: #34794a;
-  height: 10px;
-  width: 0%;
-  border-radius: 10px;
+#answers button:disabled { opacity:1; }
+#feedback { font-weight:bold; min-height:25px; }
+#nextTurn { display:none; }
+#players { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; }
+.player {
+ background:#edf5e9;
+ padding:10px;
+ border-radius:9px;
+ flex:1;
+ min-width:120px;
 }
-.small { color: #66806a; font-size: 14px; }
+.small { font-size:13px; color:#66806a; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🌿 NATURE'S CODE</h1>
-  <p>Mathematics in Our World & Patterns in Nature</p>
+ <h1>🌿 NATURE'S CODE</h1>
+ <p>The Great Nature Quest</p>
+ <p>Mathematics in Our World & Patterns in Nature</p>
 </header>
 
 <div class="container">
 
-<div class="card" id="start">
-  <div class="nature">🌻</div>
-  <h2>Discover the Math in Nature!</h2>
-  <p>Can you find the mathematics hidden in the natural world?</p>
-  <p>Answer 8 questions, earn points, and test your knowledge!</p>
-  <p><b>How to play:</b></p>
-  <p>1. Read each question.</p>
-  <p>2. Choose the correct answer.</p>
-  <p>3. Earn 10 points for every correct answer!</p>
-  <button onclick="startGame()">START GAME 🌱</button>
+<div class="card" id="setup">
+ <div style="font-size:55px">🌻🎲🐝</div>
+ <h2>Welcome, Nature Explorers!</h2>
+ <p>Travel through nature, answer math challenges, and race to the finish!</p>
+ <p><b>Number of players:</b></p>
+ <select id="playerCount">
+  <option value="2">2 Players</option>
+  <option value="3">3 Players</option>
+  <option value="4">4 Players</option>
+ </select>
+ <button onclick="startGame()" style="display:block;width:100%;margin-top:15px">START BOARD GAME 🌱</button>
 </div>
 
-<div class="card" id="game">
-  <p id="number"></p>
-  <div class="progress"><div id="bar"></div></div>
-  <div class="nature" id="picture"></div>
-  <h2 id="question"></h2>
-  <div id="options"></div>
-  <p id="feedback"></p>
-  <button id="next" onclick="nextQuestion()" style="display:none">NEXT QUESTION ➜</button>
-  <p class="small">Score: <span id="score">0</span> points</p>
+<div id="game">
+
+<div class="card">
+ <h3>🏆 PLAYER POSITIONS</h3>
+ <div id="players"></div>
+ <p class="small">First player to reach tile 25 wins!</p>
 </div>
 
-<div class="card" id="result">
-  <div class="nature">🏆</div>
-  <h2>GREAT JOB, NATURE EXPLORER!</h2>
-  <h1 id="finalScore"></h1>
-  <p id="message"></p>
-  <button onclick="startGame()">PLAY AGAIN 🔄</button>
+<div class="card">
+ <h3>🌳 THE NATURE TRAIL</h3>
+ <div id="board"></div>
+ <p class="small">Move from START to FINISH!</p>
+ </div>
+
+<div class="card">
+ <h3 id="turn">Player 1's Turn</h3>
+ <div id="dice">🎲</div>
+ <p id="diceText">Roll the dice to begin!</p>
+ <button id="roll" onclick="rollDice()">ROLL THE DICE 🎲</button>
 </div>
 
+<div class="card" id="questionArea">
+ <h3 id="challengeType">🌻 Nature Challenge</h3>
+ <h3 id="question"></h3>
+ <div id="answers"></div>
+ <p id="feedback"></p>
+ <button id="nextTurn" onclick="finishTurn()">NEXT PLAYER ➜</button>
+</div>
+
+<div class="card" id="winner" style="display:none">
+ <div style="font-size:60px">🏆🌻</div>
+ <h2 id="winnerText">We have a winner!</h2>
+ <p>Congratulations, Nature Explorer!</p>
+ <button onclick="startGame()" style="width:100%">PLAY AGAIN 🔄</button>
+</div>
+
+</div>
 </div>
 
 <script>
 const questions = [
-{
- emoji:"🌻",
- q:"What famous number pattern is often found in the arrangement of sunflower seeds?",
- a:["Fibonacci sequence","Even numbers","Prime numbers","Negative numbers"],
- correct:0,
- explain:"The Fibonacci sequence appears in many natural growth patterns, including sunflower seed arrangements."
-},
-{
- emoji:"🦋",
- q:"What mathematical concept can be seen when a butterfly's left and right wings look alike?",
- a:["Addition","Symmetry","Subtraction","Division"],
- correct:1,
- explain:"Symmetry means that two parts of a shape or object have matching forms."
-},
-{
- emoji:"🐚",
- q:"What shape or pattern is commonly seen in the growth of a nautilus shell?",
- a:["Square","Triangle","Spiral","Rectangle"],
- correct:2,
- explain:"Many shells display spiral growth patterns."
-},
-{
- emoji:"🐝",
- q:"What shape do honeybees use to build their honeycomb cells?",
- a:["Pentagon","Hexagon","Circle","Octagon"],
- correct:1,
- explain:"A hexagon has six sides. These shapes fit together without gaps."
-},
-{
- emoji:"🌳",
- q:"What do we call a pattern that repeats itself at different sizes, like the branches of some trees?",
- a:["Fractal","Straight line","Random number","Right angle"],
- correct:0,
- explain:"Fractals are patterns that show similar structures at different scales."
-},
-{
- emoji:"🍃",
- q:"What is the mathematical term for covering a surface using repeated shapes without gaps or overlaps?",
- a:["Equation","Tessellation","Fraction","Measurement"],
- correct:1,
- explain:"Tessellation happens when shapes fit together to cover a surface without gaps or overlaps."
-},
-{
- emoji:"🐌",
- q:"If a pattern follows 2, 4, 6, 8, what number comes next?",
- a:["9","10","12","14"],
- correct:1,
- explain:"The pattern adds 2 each time. Therefore, 8 + 2 = 10."
-},
-{
- emoji:"🌼",
- q:"Why is mathematics important in understanding patterns in nature?",
- a:["It helps us understand natural patterns and structures","It changes the weather","It makes plants grow instantly","It stops natural disasters"],
- correct:0,
- explain:"Mathematics helps us recognize, describe, and understand patterns in the natural world."
-}
+ {type:"🌻 Fibonacci Challenge",q:"What number comes next: 1, 1, 2, 3, 5, 8, __?",a:["10","11","13","15"],c:2,e:"13! Each number is the sum of the two numbers before it."},
+ {type:"🦋 Symmetry Challenge",q:"What does symmetry mean?",a:["Two matching parts","A curved line","A random shape","A number pattern"],c:0,e:"Symmetry means two parts match in shape and size."},
+ {type:"🐝 Honeycomb Challenge",q:"How many sides does a hexagon have?",a:["4","5","6","8"],c:2,e:"A hexagon has six sides, just like honeycomb cells."},
+ {type:"🌳 Fractal Challenge",q:"What is a fractal?",a:["A repeated pattern at different scales","A type of flower","A straight line","A measuring tool"],c:0,e:"Fractals show similar patterns at different sizes."},
+ {type:"🍃 Tessellation Challenge",q:"What is tessellation?",a:["Shapes with gaps","Shapes covering a surface without gaps or overlaps","A spiral","A fraction"],c:1,e:"Tessellation uses shapes that fit together without gaps or overlaps."},
+ {type:"🐌 Number Pattern Challenge",q:"What comes next: 2, 4, 6, 8, __?",a:["9","10","12","14"],c:1,e:"10! The pattern increases by two."},
+ {type:"🌼 Nature Mathematics",q:"Why do we study mathematics in nature?",a:["To understand natural patterns","To change the weather","To stop plant growth","To remove patterns"],c:0,e:"Mathematics helps us understand patterns and structures in nature."},
+ {type:"🌻 Fibonacci Challenge",q:"Which natural object can show Fibonacci-related patterns?",a:["Sunflower","Plastic bottle","Computer screen","Metal spoon"],c:0,e:"Sunflower seed arrangements often show Fibonacci-related patterns."},
+ {type:"🦋 Symmetry Challenge",q:"Which object commonly displays bilateral symmetry?",a:["Butterfly","Cloud","River","Rock"],c:0,e:"A butterfly's wings are a familiar example of bilateral symmetry."},
+ {type:"🐝 Honeycomb Challenge",q:"A hexagon has how many corners?",a:["3","4","5","6"],c:3,e:"A hexagon has six sides and six corners."}
 ];
 
-let current = 0;
-let score = 0;
-let answered = false;
+const icons=["🔴","🔵","🟢","🟣"];
+let players=[];
+let current=0;
+let target=0;
+let activeQuestion=null;
+let answered=false;
+let finished=false;
 
-function startGame() {
- current = 0;
- score = 0;
- document.getElementById("score").textContent = score;
- document.getElementById("start").style.display = "none";
- document.getElementById("result").style.display = "none";
- document.getElementById("game").style.display = "block";
- showQuestion();
+function startGame(){
+ const count=Number(document.getElementById("playerCount").value);
+ players=Array.from({length:count},(_,i)=>({name:"Player "+(i+1),pos:0,icon:icons[i]}));
+ current=0;
+ finished=false;
+ document.getElementById("setup").style.display="none";
+ document.getElementById("game").style.display="block";
+ document.getElementById("winner").style.display="none";
+ document.getElementById("questionArea").style.display="none";
+ document.getElementById("roll").disabled=false;
+ drawBoard();
+ updatePlayers();
+ updateTurn();
 }
 
-function showQuestion() {
- answered = false;
- const q = questions[current];
- document.getElementById("number").textContent =
- "QUESTION " + (current + 1) + " OF " + questions.length;
- document.getElementById("bar").style.width =
- (current / questions.length * 100) + "%";
- document.getElementById("picture").textContent = q.emoji;
- document.getElementById("question").textContent = q.q;
- document.getElementById("feedback").textContent = "";
- document.getElementById("next").style.display = "none";
+function tileIndex(row,col){
+ const fromBottom=4-row;
+ return fromBottom*5+(fromBottom%2===0?col:4-col);
+}
 
- const options = document.getElementById("options");
- options.innerHTML = "";
+function drawBoard(){
+ const board=document.getElementById("board");
+ board.innerHTML="";
+ for(let r=0;r<5;r++){
+  for(let c=0;c<5;c++){
+   const n=tileIndex(r,c);
+   const tile=document.createElement("div");
+   tile.className="tile";
+   if(n===0) tile.classList.add("start");
+   if(n===24) tile.classList.add("finish");
+   if(n!==0 && n!==24 && n%4===0) tile.classList.add("special");
+   let symbol=n===0?"🏁":n===24?"🏆":n%4===0?"🌻":"🍃";
+   let tokens=players.filter(p=>p.pos===n).map(p=>p.icon).join(" ");
+   tile.innerHTML='<span class="emoji">'+symbol+'</span><span class="number">'+(n+1)+'</span><span class="token">'+tokens+'</span>';
+   if(n===0) tile.innerHTML+='<b>START</b>';
+   if(n===24) tile.innerHTML+='<b>FINISH</b>';
+   board.appendChild(tile);
+  }
+ }
+}
 
- q.a.forEach((answer, index) => {
-  const btn = document.createElement("button");
-  btn.textContent = answer;
-  btn.className = "option";
-  btn.onclick = () => checkAnswer(index, btn);
-  options.appendChild(btn);
+function updatePlayers(){
+ document.getElementById("players").innerHTML=players.map((p,i)=>
+ '<div class="player">'+p.icon+' <b>'+p.name+'</b><br>Tile '+(p.pos+1)+'</div>'
+ ).join("");
+}
+
+function updateTurn(){
+ document.getElementById("turn").textContent=players[current].icon+" "+players[current].name+"'s Turn";
+ document.getElementById("dice").textContent="🎲";
+ document.getElementById("diceText").textContent="Roll the dice to begin!";
+ document.getElementById("roll").disabled=false;
+}
+
+function rollDice(){
+ if(finished)return;
+ const roll=Math.floor(Math.random()*6)+1;
+ document.getElementById("dice").textContent=["⚀","⚁","⚂","⚃","⚄","⚅"][roll-1];
+ document.getElementById("diceText").textContent="You rolled a "+roll+"!";
+ target=Math.min(24,players[current].pos+roll);
+ document.getElementById("roll").disabled=true;
+ drawBoard();
+ askQuestion();
+}
+
+function askQuestion(){
+ activeQuestion=questions[Math.floor(Math.random()*questions.length)];
+ answered=false;
+ document.getElementById("questionArea").style.display="block";
+ document.getElementById("challengeType").textContent=activeQuestion.type;
+ document.getElementById("question").textContent=activeQuestion.q;
+ document.getElementById("feedback").textContent="";
+ document.getElementById("nextTurn").style.display="none";
+ const answers=document.getElementById("answers");
+ answers.innerHTML="";
+ activeQuestion.a.forEach((answer,i)=>{
+  const b=document.createElement("button");
+  b.textContent=answer;
+  b.onclick=()=>checkAnswer(i,b);
+  answers.appendChild(b);
  });
 }
 
-function checkAnswer(index, btn) {
- if (answered) return;
- answered = true;
-
- const q = questions[current];
- const buttons = document.querySelectorAll(".option");
-
- buttons.forEach(b => b.disabled = true);
-
- if (index === q.correct) {
-  score += 10;
-  btn.style.background = "#c9edce";
-  btn.style.borderColor = "#34794a";
-  document.getElementById("feedback").textContent =
-   "✅ CORRECT! " + q.explain;
- } else {
-  btn.style.background = "#f6dada";
-  document.getElementById("feedback").textContent =
-   "❌ NOT QUITE! Correct answer: " +
-   q.a[q.correct] + ". " + q.explain;
+function checkAnswer(index,button){
+ if(answered)return;
+ answered=true;
+ const buttons=document.querySelectorAll("#answers button");
+ buttons.forEach(b=>b.disabled=true);
+ const p=players[current];
+ if(index===activeQuestion.c){
+  p.pos=target;
+  button.style.background="#c9edce";
+  document.getElementById("feedback").textContent="✅ CORRECT! "+activeQuestion.e;
+ }else{
+  p.pos=Math.max(0,target-1);
+  button.style.background="#f6dada";
+  document.getElementById("feedback").textContent="❌ "+activeQuestion.e+" Move back one tile!";
  }
-
- document.getElementById("score").textContent = score;
- document.getElementById("next").style.display = "block";
- document.getElementById("next").textContent =
-  current === questions.length - 1 ? "SEE MY SCORE 🏆" : "NEXT QUESTION ➜";
+ drawBoard();
+ updatePlayers();
+ if(p.pos===24){
+  finished=true;
+  document.getElementById("nextTurn").textContent="SEE WINNER 🏆";
+ }else{
+  document.getElementById("nextTurn").textContent="NEXT PLAYER ➜";
+ }
+ document.getElementById("nextTurn").style.display="block";
 }
 
-function nextQuestion() {
- current++;
- if (current < questions.length) {
-  showQuestion();
- } else {
-  showResult();
+function finishTurn(){
+ if(finished){
+  document.getElementById("questionArea").style.display="none";
+  document.getElementById("winner").style.display="block";
+  document.getElementById("winnerText").textContent=players[current].name+" WINS THE GAME! 🎉";
+  return;
  }
-}
-
-function showResult() {
- document.getElementById("game").style.display = "none";
- document.getElementById("result").style.display = "block";
- document.getElementById("bar").style.width = "100%";
- document.getElementById("finalScore").textContent =
-  score + " / 80 POINTS";
-
- let message = score === 80
-  ? "Perfect score! You are a true Nature Explorer! 🌟"
-  : score >= 50
-  ? "Amazing work! You understand the mathematics of nature! 🌿"
-  : "Good effort! Keep exploring and learning about mathematics! 🌱";
-
- document.getElementById("message").textContent = message;
+ document.getElementById("questionArea").style.display="none";
+ current=(current+1)%players.length;
+ updateTurn();
 }
 </script>
-
 </body>
 </html>
+
